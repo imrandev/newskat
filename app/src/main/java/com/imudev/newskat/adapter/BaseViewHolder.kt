@@ -1,10 +1,18 @@
 package com.imudev.newskat.adapter
 
 import android.view.View
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.RecyclerView
 
-abstract class BaseViewHolder<T, L : IBaseClickListener<T>?>(itemView: View) :
-    RecyclerView.ViewHolder(itemView) {
+
+abstract class BaseViewHolder<T, L : IBaseClickListener<T>?>(viewDataBinding: ViewDataBinding) :
+    RecyclerView.ViewHolder(viewDataBinding.root) {
+
+    abstract fun onBindView()
+    abstract fun onBindView(`object`: T)
+    abstract fun onBindView(`object`: T, onItemClickedListener: L)
+    abstract fun onViewRecycled()
+
     fun attachListener(onItemClickListener: L, item: T) {
         itemView.setOnClickListener { view: View? ->
             onItemClickListener!!.onItemClicked(

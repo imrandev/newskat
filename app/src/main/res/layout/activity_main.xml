@@ -13,7 +13,7 @@
             layout="@layout/appbar_layout"/>
 
         <fragment
-            android:id="@+id/fragmentNavHost"
+            android:id="@+id/navHostFragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -26,8 +26,9 @@
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:elevation="8dp"
-            app:itemIconTint="@color/colorPrimaryDark"
+            app:itemBackground="@color/colorBottomNavigation"
+            app:itemIconTint="@drawable/item_bottom_color"
+            app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior"
             app:menu="@menu/bottom_navigation"
             app:labelVisibilityMode="unlabeled"
             app:layout_constraintBottom_toBottomOf="parent"/>

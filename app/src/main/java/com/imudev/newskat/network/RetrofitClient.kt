@@ -6,10 +6,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Cache
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
-
+import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
@@ -39,8 +40,17 @@ object RetrofitClient {
 
     private fun provideOkHttpClient(cache: Cache?, context: Context): OkHttpClient {
         val httpClient = OkHttpClient.Builder()
+
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
+        httpClient.networkInterceptors().add(httpLoggingInterceptor)
+
         httpClient.addInterceptor(OfflineCacheInterceptor(context))
         httpClient.cache(cache)
+
+        httpClient.writeTimeout(60, TimeUnit.SECONDS)
+        httpClient.connectTimeout(60, TimeUnit.SECONDS)
+        httpClient.readTimeout(60, TimeUnit.SECONDS)
         return httpClient.build()
     }
 
@@ -59,7 +69,7 @@ object RetrofitClient {
     private fun provideCache(context: Context): Cache? {
         var cache: Cache? = null
         try {
-            cache = Cache(File(context.getCacheDir(), "http-cache"), 10 * 1024 * 1024) // 10 MB
+            cache = Cache(File(context.cacheDir, "http-cache"), 10 * 1024 * 1024) // 10 MB
         } catch (e: Exception) {
             Log.e(TAG, "Could not create Cache!")
         }

@@ -3,21 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@id/todayFragment"
-        android:title="Today"
+        android:id="@id/headlineFragment"
+        android:title="@string/today"
+        android:icon="@drawable/ic_headline"
         app:showAsAction="always"
         />
 
     <item
         android:id="@id/sourceFragment"
-        android:title="Source"
-        app:showAsAction="ifRoom"
+        android:title="@string/source"
+        android:icon="@drawable/ic_source"
+        app:showAsAction="always"
         />
 
     <item
         android:id="@id/searchFragment"
-        android:title="Search"
-        app:showAsAction="always"
+        android:title="@string/search"
+        android:icon="@drawable/ic_search"
+        app:showAsAction="ifRoom"
         />
 
 </menu>

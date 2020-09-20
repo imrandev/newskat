@@ -1,4 +1,4 @@
-package com.imudev.newskat.model
+package com.imudev.newskat.model.headline
 
 data class Source(
     val id: String,

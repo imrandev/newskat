@@ -1,54 +1,81 @@
 package com.imudev.newskat.adapter
 
-import android.content.res.Resources.NotFoundException
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.imudev.newskat.utils.ViewType
 
 
-abstract class BaseRecyclerAdapter<T, L : IBaseClickListener<T>?, V : BaseViewHolder<T, L>?> protected constructor(
-    private var itemList: MutableList<T>?
-) :
-    RecyclerView.Adapter<V>() {
+abstract class BaseRecyclerAdapter<T, L : IBaseClickListener<T>?> protected constructor(
+    private var itemList: MutableList<T>?,
+    private var onItemClickedListener : L
+) : RecyclerView.Adapter<BaseViewHolder<T, L>>() {
 
-    private var onItemClickListener: L? = null
-    fun attachListener(onItemClickListener: L) {
-        this.onItemClickListener = onItemClickListener
+    private var onItemClickListener: L = this.onItemClickedListener
+
+    private val differCallback = object : DiffUtil.ItemCallback<T>(){
+
+        override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
+            return areItemsTheSame(oldItem, newItem)
+        }
+
+        override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
+            return areContentsTheSame(oldItem, newItem)
+        }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): V {
-        return onCreateView(parent, viewType)
+    init {
+        if (itemList == null){
+            itemList = ArrayList()
+        }
     }
 
-    override fun onBindViewHolder(holder: V, position: Int) {
-        val item = if (isRecyclerViewEmpty) null else itemList!![position]
-        onBindView(holder, item, position)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<T, L> {
+        return if (itemList == null || itemList!!.size == 0) onCreateEmptyView(parent, viewType) else onCreateView(parent, viewType)
+    }
 
-        // attaching click listener to view
-        onItemClickListener?.let {
-            if (item != null) {
-                if (holder != null) {
-                    holder.attachListener(it, item)
-                }
-            }
+    override fun onBindViewHolder(holder: BaseViewHolder<T, L>, position: Int) {
+        if (itemList!!.size > 0 && getItemViewType(position) == ViewType.NORMAL_VIEW){
+            val item = itemList!!.get(position)
+            holder.onBindView(item, onItemClickListener)
+        } else {
+            holder.onBindView()
         }
     }
 
     override fun getItemCount(): Int {
-        return if (itemList!!.size == 0) 1 else itemList!!.size
+        return if (itemList == null || itemList!!.size == 0) 1 else itemList!!.size
     }
 
-    protected val isRecyclerViewEmpty: Boolean
-        get() = itemList!!.size == 0
+    override fun getItemViewType(position: Int): Int {
+        return if (itemList == null || itemList!!.size == 0) ViewType.LOADER_VIEW else ViewType.NORMAL_VIEW
+    }
 
-    fun update(newItemList: MutableList<T>?) {
-        itemList = newItemList
-        notifyItemRangeChanged(0, itemList!!.size)
+    fun update(newItemList: MutableList<T>) {
+        val diffResult =
+            itemList?.let {
+                DiffUtil.calculateDiff(object : DiffUtilItemCallback<T>(it, newItemList){
+                    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return areSameItems(itemList?.get(oldItemPosition), itemList?.get(newItemPosition))
+                    }
+
+                    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+                        return areSameContents(itemList?.get(oldItemPosition), itemList?.get(newItemPosition))
+                    }
+                })
+            }
+
+        this.itemList?.clear();
+        this.itemList?.addAll(newItemList);
+        diffResult?.dispatchUpdatesTo(this)
     }
 
     fun add(newItemList: List<T>?) {
         val startPosition = itemCount
         if (newItemList != null) {
-            itemList?.addAll(newItemList)
+            itemList!!.clear()
+            itemList!!.addAll(newItemList)
         }
         notifyItemRangeInserted(startPosition, itemList!!.size)
     }
@@ -58,10 +85,8 @@ abstract class BaseRecyclerAdapter<T, L : IBaseClickListener<T>?, V : BaseViewHo
         if (itemList!!.remove(item)) notifyItemRemoved(position)
     }
 
-    abstract fun onCreateView(parent: ViewGroup?, viewType: Int): V
-    abstract fun onBindView(holder: V, item: T?, position: Int)
-
-    init {
-        if (itemList == null) throw NotFoundException("Recycler adapter item list is null")
-    }
+    abstract fun onCreateView(parent: ViewGroup?, viewType: Int): BaseViewHolder<T, L>
+    abstract fun onCreateEmptyView(parent: ViewGroup?, viewType: Int): BaseViewHolder<T, L>
+    abstract fun areSameItems(oldItem: T?, newItem: T?): Boolean
+    abstract fun areSameContents(oldItem: T?, newItem: T?): Boolean
 }

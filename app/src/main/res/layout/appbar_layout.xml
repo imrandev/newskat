@@ -12,8 +12,12 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:title="@string/app_name"
+            android:theme="@style/ToolbarTheme"
+            app:contentInsetStart="0dp"
+            app:contentInsetStartWithNavigation="0dp"
+            app:logo="@drawable/ic_newskat_icon"
             android:background="@android:color/white"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"/>
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     </com.google.android.material.appbar.AppBarLayout>
 </layout>
