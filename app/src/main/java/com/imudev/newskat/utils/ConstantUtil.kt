@@ -13,4 +13,13 @@ object ConstantUtil {
     val OK = "ok"
     val ERROR = "error"
     val API_KEY = "260d9d6621e04b41aa60f7139bfaf7ce"
+
+    val POSITION = "position"
+
+    val API_TAG = "api-tag"
+    val API_HEADLINE = "headline"
+    val API_SOURCES = "sources"
+    val API_HEADLINE_BY_SOURCE = "headline-source"
+
+    val ARTICLE_URI = "article-uri"
 }

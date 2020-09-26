@@ -22,11 +22,10 @@ import com.imudev.newskat.databinding.FragmentArticleListBinding
 import com.imudev.newskat.model.headline.Article
 import com.imudev.newskat.ui.base.BaseFragment
 import com.imudev.newskat.ui.main.MainActivity
+import com.imudev.newskat.utils.ConstantUtil
 import com.imudev.newskat.utils.WrapperFlexLayoutManager
 import com.imudev.newskat.viewholder.HeadlineEmptyViewHolder
 import com.imudev.newskat.viewholder.HeadlineSourceViewHolder
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class ArticleListFragment : BaseFragment<FragmentArticleListBinding>() {
 
@@ -101,10 +100,8 @@ class ArticleListFragment : BaseFragment<FragmentArticleListBinding>() {
         lifecycleScope.launchWhenStarted {
             source?.let {
                 mainActivity.supportActionBar?.title = source
-                mainViewModel.initHeadlinesBySource(it).observe(viewLifecycleOwner, Observer { headlines ->
-                    Handler().postDelayed({
-                        baseRecyclerAdapter.update(headlines.toMutableList())
-                    }, 1500)
+                mainViewModel.findHeadlinesBySourceId(it).observe(viewLifecycleOwner, Observer { headlines ->
+                    baseRecyclerAdapter.update(headlines.toMutableList())
                 })
             }
         }
@@ -112,7 +109,12 @@ class ArticleListFragment : BaseFragment<FragmentArticleListBinding>() {
 
     val headlineItemClickListener = object : IBaseClickListener<Article> {
         override fun onItemClicked(view: View?, item: Article, position: Int) {
+            val extras = Bundle()
+            extras.putInt("position", position)
+            extras.putString(ConstantUtil.API_TAG, ConstantUtil.API_HEADLINE_BY_SOURCE)
+            extras.putString(ConstantUtil.API_SOURCES, source)
             val navController = Navigation.findNavController(activity!!, R.id.navHostFragment)
+            navController.navigate(R.id.action_articleListFragment_to_articleFragment, extras)
         }
     }
 }

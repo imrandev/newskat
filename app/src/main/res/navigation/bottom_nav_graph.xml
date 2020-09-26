@@ -17,6 +17,12 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_headlineFragment_to_sourceFragment"
+            app:destination="@id/sourceFragment" />
+        <action
+            android:id="@+id/action_headlineFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
     </fragment>
 
     <fragment
@@ -31,6 +37,12 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_sourceFragment_to_headlineFragment"
+            app:destination="@id/headlineFragment" />
+        <action
+            android:id="@+id/action_sourceFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
     </fragment>
 
     <fragment
@@ -45,6 +57,12 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_searchFragment_to_sourceFragment"
+            app:destination="@id/sourceFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_headlineFragment"
+            app:destination="@id/headlineFragment" />
     </fragment>
 
     <fragment
@@ -54,10 +72,21 @@
         <action
             android:id="@+id/action_articleFragment_self"
             app:destination="@id/articleFragment" />
+        <action
+            android:id="@+id/action_articleFragment_to_webFragment"
+            app:destination="@id/webFragment" />
     </fragment>
     <fragment
         android:id="@+id/articleListFragment"
         android:name="com.imudev.newskat.ui.article.ArticleListFragment"
-        android:label="Articles" />
+        android:label="Articles" >
+        <action
+            android:id="@+id/action_articleListFragment_to_articleFragment"
+            app:destination="@id/articleFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/webFragment"
+        android:name="com.imudev.newskat.ui.web.WebFragment"
+        android:label="Web" />
 
 </navigation>

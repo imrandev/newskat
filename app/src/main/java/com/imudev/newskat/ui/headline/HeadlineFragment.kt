@@ -9,7 +9,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.imudev.newskat.R
 import com.imudev.newskat.adapter.BaseRecyclerAdapter
@@ -18,6 +17,7 @@ import com.imudev.newskat.adapter.IBaseClickListener
 import com.imudev.newskat.databinding.FragmentHeadlineBinding
 import com.imudev.newskat.model.headline.Article
 import com.imudev.newskat.ui.base.BaseFragment
+import com.imudev.newskat.utils.ConstantUtil
 import com.imudev.newskat.utils.WrapperLinearLayoutManager
 import com.imudev.newskat.viewholder.HeadlineEmptyViewHolder
 import com.imudev.newskat.viewholder.HeadlineViewHolder
@@ -59,7 +59,7 @@ class HeadlineFragment : BaseFragment<FragmentHeadlineBinding>() {
         }
 
         lifecycleScope.launchWhenStarted {
-            mainViewModel.initHeadline().observe(viewLifecycleOwner, Observer {
+            mainViewModel.findHeadlines().observe(viewLifecycleOwner, Observer {
                 // this is the trigger point when headline data has changed
                 baseRecyclerAdapter.update(it.toMutableList())
             })
@@ -78,6 +78,7 @@ class HeadlineFragment : BaseFragment<FragmentHeadlineBinding>() {
         override fun onItemClicked(view: View?, item: Article, position: Int) {
             val extras = Bundle()
             extras.putInt("position", position)
+            extras.putString(ConstantUtil.API_TAG, ConstantUtil.API_HEADLINE)
             val navController = Navigation.findNavController(activity!!, R.id.navHostFragment)
             navController.navigate(R.id.action_headlineFragment_to_articleFragment, extras)
         }

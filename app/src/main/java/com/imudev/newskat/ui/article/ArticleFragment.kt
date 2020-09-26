@@ -30,6 +30,7 @@ import com.imudev.newskat.model.headline.Article
 import com.imudev.newskat.model.headline.Author
 import com.imudev.newskat.ui.base.BaseFragment
 import com.imudev.newskat.utils.CalendarUtil
+import com.imudev.newskat.utils.ConstantUtil
 import com.imudev.newskat.viewholder.HeadlineEmptyViewHolder
 import com.imudev.newskat.viewholder.HeadlineSourceViewHolder
 
@@ -37,6 +38,8 @@ class ArticleFragment : BaseFragment<FragmentArticleBinding>() {
 
     private lateinit var fragmentArticleBinding: FragmentArticleBinding
     private var position = 0
+    private var apiTag : String? = null
+    private var source : String? = null
 
     override fun isFullWindow(): Boolean {
         return true
@@ -45,7 +48,9 @@ class ArticleFragment : BaseFragment<FragmentArticleBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            position = it.getInt("position")
+            position = it.getInt(ConstantUtil.POSITION)
+            apiTag = it.getString(ConstantUtil.API_TAG, "")
+            source = it.getString(ConstantUtil.API_SOURCES, "")
         }
     }
 
@@ -97,20 +102,32 @@ class ArticleFragment : BaseFragment<FragmentArticleBinding>() {
         }
 
         lifecycleScope.launchWhenStarted {
-            mainViewModel.initHeadline().observe(viewLifecycleOwner,
-                Observer {
-                    it?.get(position)?.let { headline -> setArticleIntoViews(headline, baseRecyclerAdapter) }
-                }
-            )
-        }
+            apiTag.let {
+                when (it){
+                    ConstantUtil.API_HEADLINE -> {
+                        mainViewModel.findHeadlines().observe(viewLifecycleOwner,
+                            Observer {
+                                it?.get(position)?.let { headline -> setArticleIntoViews(headline, baseRecyclerAdapter) }
+                            }
+                        )
+                    }
 
+                    ConstantUtil.API_HEADLINE_BY_SOURCE -> {
+                        mainViewModel.findHeadlinesBySourceId(source!!).observe(viewLifecycleOwner,
+                            Observer {
+                                it?.get(position)?.let { headline -> setArticleIntoViews(headline, baseRecyclerAdapter) }
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     private fun setArticleIntoViews(
         article: Article,
         baseRecyclerAdapter: BaseRecyclerAdapter<Article, IBaseClickListener<Article>>
     ) {
-
         Glide.with(fragmentArticleBinding.root).asDrawable().load(article.urlToImage).override(
             fragmentArticleBinding.ivNewsCover.measuredWidth,
             fragmentArticleBinding.ivNewsCover.measuredHeight
@@ -137,6 +154,12 @@ class ArticleFragment : BaseFragment<FragmentArticleBinding>() {
             }
         })
             .error(R.drawable.ic_online_articles).into(fragmentArticleBinding.ivNewsCover)
+
+        if (article.author == null){
+            article.source?.let {
+                fragmentArticleBinding.articleToolbar.title = it.name
+            }
+        }
 
         article.author?.let {
             if (it.contains("[{")){
@@ -168,12 +191,16 @@ class ArticleFragment : BaseFragment<FragmentArticleBinding>() {
         }
 
         lifecycleScope.launchWhenStarted {
-            mainViewModel.initHeadlinesBySource(article.source).observe(viewLifecycleOwner, Observer {
+            mainViewModel.findHeadlinesBySourceId(article.source).observe(viewLifecycleOwner, Observer {
                 baseRecyclerAdapter.update(it.toMutableList())
-                Handler().postDelayed({
-                    fragmentArticleBinding.rvMoreSourceHeadlines.visibility = View.VISIBLE
-                }, 1000)
             })
+        }
+
+        fragmentArticleBinding.fabWeb.setOnClickListener {
+            val extras = Bundle()
+            extras.putString(ConstantUtil.ARTICLE_URI, article.url)
+            val navController = Navigation.findNavController(requireActivity(), R.id.navHostFragment)
+            navController.navigate(R.id.action_articleFragment_to_webFragment, extras)
         }
     }
 
@@ -183,7 +210,12 @@ class ArticleFragment : BaseFragment<FragmentArticleBinding>() {
 
     val headlineItemClickListener = object : IBaseClickListener<Article> {
         override fun onItemClicked(view: View?, item: Article, position: Int) {
+            val extras = Bundle()
+            extras.putInt("position", position)
+            extras.putString(ConstantUtil.API_TAG, ConstantUtil.API_HEADLINE_BY_SOURCE)
+            extras.putString(ConstantUtil.API_SOURCES, item.source.id)
             val navController = Navigation.findNavController(activity!!, R.id.navHostFragment)
+            navController.navigate(R.id.action_articleFragment_self, extras)
         }
     }
 }

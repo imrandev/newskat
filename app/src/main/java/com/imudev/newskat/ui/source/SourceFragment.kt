@@ -99,7 +99,7 @@ class SourceFragment : BaseFragment<FragmentSourceBinding>() {
         }
 
         lifecycleScope.launchWhenStarted {
-            mainViewModel.initSourcesApi("").observe(viewLifecycleOwner, Observer {
+            mainViewModel.findSources("").observe(viewLifecycleOwner, Observer {
                 baseRecyclerAdapter.update(it.toMutableList())
             })
         }

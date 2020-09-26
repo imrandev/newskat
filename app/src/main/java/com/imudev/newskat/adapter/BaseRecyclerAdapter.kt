@@ -1,7 +1,6 @@
 package com.imudev.newskat.adapter
 
 import android.view.ViewGroup
-import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.imudev.newskat.utils.ViewType
@@ -66,8 +65,9 @@ abstract class BaseRecyclerAdapter<T, L : IBaseClickListener<T>?> protected cons
                 })
             }
 
-        this.itemList?.clear();
-        this.itemList?.addAll(newItemList);
+        this.itemList?.clear()
+        this.itemList?.addAll(newItemList)
+        notifyDataSetChanged()
         diffResult?.dispatchUpdatesTo(this)
     }
 

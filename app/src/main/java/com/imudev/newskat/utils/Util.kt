@@ -48,15 +48,19 @@ class CalendarUtil {
         val seconds = diff / 1000
         val minutes = seconds / 60
         val hours = minutes / 60
+        val days = hours / 24
         if (hours == 0L && minutes == 0L){
             val sec = if (seconds > 1) "seconds" else "second"
             return "${seconds} ${sec} ago"
         } else if (hours == 0L){
             val min = if (minutes > 1) "minutes" else "minute"
             return "${minutes} ${min} ago"
-        } else {
+        } else if (days == 0L){
             val hr = if (hours > 1) "hours" else "hour"
             return "${hours} ${hr} ago"
+        } else {
+            val d = if (days > 1) "days" else "day"
+            return "${days} ${d} ago"
         }
     }
 }

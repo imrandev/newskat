@@ -13,7 +13,8 @@ import com.imudev.newskat.utils.ConstantUtil
 class HeadlineRepository {
 
     private var topHeadlineMutableList : MutableLiveData<List<Article>> = MutableLiveData()
-    private var headlineSourceMutableList : MutableLiveData<List<Article>> = MutableLiveData()
+    private lateinit var headlineBySourceMutableList : MutableLiveData<List<Article>>
+    private lateinit var headlineBySourceIdMutableList : MutableLiveData<List<Article>>
 
     companion object {
         var instance = HeadlineRepository()
@@ -25,21 +26,23 @@ class HeadlineRepository {
         return topHeadlineMutableList;
     }
 
-    fun getSourceHeadlines(context: Context, source: Source) : MutableLiveData<List<Article>> {
+    fun getHeadlinesBySource(context: Context, source: Source) : MutableLiveData<List<Article>> {
+        headlineBySourceMutableList = MutableLiveData()
         retrieve(context, source)
-        return headlineSourceMutableList;
+        return headlineBySourceMutableList
     }
 
-    fun getSourceHeadlines(context: Context, source: String) : MutableLiveData<List<Article>> {
+    fun getHeadlinesBySourceId(context: Context, source: String) : MutableLiveData<List<Article>> {
+        headlineBySourceIdMutableList = MutableLiveData()
         retrieve(context, source)
-        return headlineSourceMutableList;
+        return headlineBySourceIdMutableList
     }
 
     private fun retrieve(context: Context){
         val map = hashMapOf<String, String>()
         map["apiKey"] = ConstantUtil.API_KEY
         map["language"] = "en"
-        // set data from webservice
+        // find headlines from server
         RetrofitClient.getInstance(ConstantUtil.BASE_URL, context)?.findTopHeadlines(map.toMap())?.enqueue(topHeadlineEnqueueResponse)
     }
 
@@ -48,24 +51,24 @@ class HeadlineRepository {
         map["apiKey"] = ConstantUtil.API_KEY
         map["language"] = "en"
         map["sources"] = source.id
-        // set data from webservice
-        RetrofitClient.getInstance(ConstantUtil.BASE_URL, context)?.findTopHeadlines(map.toMap())?.enqueue(headlineSourceEnqueueResponse)
+        // find headlines by source from server
+        RetrofitClient.getInstance(ConstantUtil.BASE_URL, context)?.findTopHeadlines(map.toMap())?.enqueue(headlinesBySourceEnqueueResponse)
     }
 
-    private fun retrieve(context: Context, source: String){
+    private fun retrieve(context: Context, sourceId: String){
         val map = hashMapOf<String, String>()
         map["apiKey"] = ConstantUtil.API_KEY
         map["language"] = "en"
-        map["sources"] = source
-        // set data from webservice
-        RetrofitClient.getInstance(ConstantUtil.BASE_URL, context)?.findTopHeadlines(map.toMap())?.enqueue(headlineSourceEnqueueResponse)
+        map["sources"] = sourceId
+        // find headlines by source id from server
+        RetrofitClient.getInstance(ConstantUtil.BASE_URL, context)?.findTopHeadlines(map.toMap())?.enqueue(headlinesBySourceIdEnqueueResponse)
     }
 
     private val topHeadlineEnqueueResponse  =  object : EnqueueResponse<HeadLine>() {
 
         override fun onReceived(body: HeadLine?, message: String?) {
             if (body != null) {
-                topHeadlineMutableList.value = body.articles
+                topHeadlineMutableList.postValue(body.articles)
                 Log.d(TAG, "onReceived: " + body.articles.size)
             }
         }
@@ -79,11 +82,29 @@ class HeadlineRepository {
         }
     }
 
-    private val headlineSourceEnqueueResponse  =  object : EnqueueResponse<HeadLine>() {
+    private val headlinesBySourceEnqueueResponse  =  object : EnqueueResponse<HeadLine>() {
 
         override fun onReceived(body: HeadLine?, message: String?) {
             if (body != null) {
-                headlineSourceMutableList.value = body.articles
+                headlineBySourceMutableList.postValue(body.articles)
+                Log.d(TAG, "onReceived: " + body.articles.size)
+            }
+        }
+
+        override fun onError(message: String?, code: Int) {
+            Log.d(TAG, "onError: $message")
+        }
+
+        override fun onFailed(message: String?) {
+            Log.d(TAG, "onFailed: $message")
+        }
+    }
+
+    private val headlinesBySourceIdEnqueueResponse  =  object : EnqueueResponse<HeadLine>() {
+
+        override fun onReceived(body: HeadLine?, message: String?) {
+            if (body != null) {
+                headlineBySourceIdMutableList.postValue(body.articles)
                 Log.d(TAG, "onReceived: " + body.articles.size)
             }
         }

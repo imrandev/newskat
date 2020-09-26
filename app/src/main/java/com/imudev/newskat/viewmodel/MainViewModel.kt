@@ -17,10 +17,9 @@ import kotlinx.coroutines.launch
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val headlinesApiDeferred = CompletableDeferred<MutableLiveData<List<Article>>>()
-    private val sourceHeadlinesApiDeferred = CompletableDeferred<MutableLiveData<List<Article>>>()
     private val sourcesApiDeferred = CompletableDeferred<MutableLiveData<List<com.imudev.newskat.model.source.Source>>>()
 
-    suspend fun initHeadline() : LiveData<List<Article>> {
+    suspend fun findHeadlines() : LiveData<List<Article>> {
         val headlineRepository = HeadlineRepository.instance
         viewModelScope.launch(Dispatchers.IO) {
             val headlines = headlineRepository.getHeadlines(getApplication())
@@ -29,25 +28,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return headlinesApiDeferred.await()
     }
 
-    suspend fun initHeadlinesBySource(source: Source) : LiveData<List<Article>> {
+    suspend fun findHeadlinesBySourceId(source: Source) : LiveData<List<Article>> {
+        val sourceHeadlinesApiDeferred = CompletableDeferred<MutableLiveData<List<Article>>>()
         val headlineRepository = HeadlineRepository.instance
         viewModelScope.launch(Dispatchers.IO) {
-            val sourceHeadlines = headlineRepository.getSourceHeadlines(getApplication(), source)
+            val sourceHeadlines = headlineRepository.getHeadlinesBySource(getApplication(), source)
             sourceHeadlinesApiDeferred.complete(sourceHeadlines)
         }
         return sourceHeadlinesApiDeferred.await()
     }
 
-    suspend fun initHeadlinesBySource(source: String) : LiveData<List<Article>> {
+    suspend fun findHeadlinesBySourceId(source: String) : LiveData<List<Article>> {
+        val sourceIdHeadlinesApiDeferred = CompletableDeferred<MutableLiveData<List<Article>>>()
         val headlineRepository = HeadlineRepository.instance
         viewModelScope.launch(Dispatchers.IO) {
-            val sourceHeadlines = headlineRepository.getSourceHeadlines(getApplication(), source)
-            sourceHeadlinesApiDeferred.complete(sourceHeadlines)
+            val sourceHeadlines = headlineRepository.getHeadlinesBySourceId(getApplication(), source)
+            sourceIdHeadlinesApiDeferred.complete(sourceHeadlines)
         }
-        return sourceHeadlinesApiDeferred.await()
+        return sourceIdHeadlinesApiDeferred.await()
     }
 
-    suspend fun initSourcesApi(category: String) : LiveData<List<com.imudev.newskat.model.source.Source>>{
+    suspend fun findSources(category: String) : LiveData<List<com.imudev.newskat.model.source.Source>>{
         val sourceRepository = SourceRepository.instance
         viewModelScope.launch(Dispatchers.IO) {
             val sources = sourceRepository.findSources(getApplication(), category)
